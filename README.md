@@ -14,26 +14,21 @@ This application uses AI to modify news articles to promote a person of interest
 
 - Python 3.8+
 - Node.js 14+
-- NewsAPI key (get it from [NewsAPI](https://newsapi.org/))
-- OpenAI API key (get it from [OpenAI](https://openai.com/))
+
 
 ## Setup
 
 1. Clone the repository
-2. Create a `.env` file in the root directory with the following content:
-```
-NEWS_API_KEY=your_news_api_key
-OPENAI_API_KEY=your_openai_api_key
-```
 
-3. Backend Setup:
+
+2. Backend Setup:
 ```bash
 cd backend
 pip install -r ../requirements.txt
 python main.py
 ```
 
-4. Frontend Setup:
+3. Frontend Setup:
 ```bash
 cd frontend
 npm install
