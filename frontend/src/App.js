@@ -13,6 +13,7 @@ import {
   Divider,
   IconButton,
   Tooltip,
+  LinearProgress,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import axios from 'axios';
@@ -24,21 +25,63 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [copySuccess, setCopySuccess] = useState({});
+  const [progress, setProgress] = useState(0);
+  const [progressText, setProgressText] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setArticles([]);
+    setProgress(0);
+    setProgressText('Fetching news articles...');
     
     try {
+      // Start progress at 10%
+      setProgress(10);
+      
       const response = await axios.post('http://localhost:8001/api/articles', {
         person_of_interest: personOfInterest,
         query: query,
       });
       
-      setArticles(response.data.articles);
+      // Process articles one by one with progress updates
+      const receivedArticles = response.data.articles;
+      const totalArticles = receivedArticles.length;
+      
+      // Calculate progress steps
+      const progressPerArticle = 80 / totalArticles; // Reserve 10% for start and end
+      
+      const processedArticles = [];
+      for (let i = 0; i < receivedArticles.length; i++) {
+        const article = receivedArticles[i];
+        processedArticles.push(article);
+        
+        // Update progress
+        const currentProgress = 10 + ((i + 1) * progressPerArticle);
+        setProgress(currentProgress);
+        setProgressText(`Processing article ${i + 1} of ${totalArticles}...`);
+        
+        // Add a small delay to show progress (optional)
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Update articles state to show them appearing one by one
+        setArticles([...processedArticles]);
+      }
+      
+      // Complete the progress
+      setProgress(100);
+      setProgressText('All articles processed successfully!');
+      
+      // Clear progress text after a delay
+      setTimeout(() => {
+        setProgressText('');
+      }, 2000);
+      
     } catch (err) {
       setError(err.response?.data?.detail || 'An error occurred while fetching articles');
+      setProgress(0);
+      setProgressText('');
     } finally {
       setLoading(false);
     }
@@ -96,6 +139,31 @@ function App() {
           </Grid>
         </form>
       </Paper>
+
+      {/* Progress Section */}
+      {(loading || progress > 0) && (
+        <Box sx={{ width: '100%', mb: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              {progressText}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {Math.round(progress)}%
+            </Typography>
+          </Box>
+          <LinearProgress 
+            variant="determinate" 
+            value={progress} 
+            sx={{
+              height: 8,
+              borderRadius: 4,
+              '& .MuiLinearProgress-bar': {
+                borderRadius: 4,
+              },
+            }}
+          />
+        </Box>
+      )}
 
       {error && (
         <Typography color="error" align="center" gutterBottom>
